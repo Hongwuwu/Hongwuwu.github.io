@@ -1,0 +1,547 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>irweb 工业巡检智能助手部署手册 | HW's Club</title><meta name="keywords" content="工业安全,tech,部署"><meta name="author" content="JY"><meta name="copyright" content="JY"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#18171d"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="irweb 工业巡检智能助手部署手册"><meta name="application-name" content="irweb 工业巡检智能助手部署手册"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#18171d"><meta property="og:type" content="article"><meta property="og:title" content="irweb 工业巡检智能助手部署手册"><meta property="og:url" content="http://hwarkm.com/2026/04/26/irweb-%E5%B7%A5%E4%B8%9A%E5%B7%A1%E6%A3%80%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E9%83%A8%E7%BD%B2%E6%89%8B%E5%86%8C/index.html"><meta property="og:site_name" content="HW's Club"><meta property="og:description" content="记录 Smart Maintenance Copilot（智能维护助手）从本地 v0 项目到生产部署的完整流程，包括架构设计、子域名配置、视频流接入，以及后续后端接口规划。 项目概述基于 v0 生成的 Next.js 16 + shadcn&amp;#x2F;ui 工业巡检仪表盘，三大面板：  左侧 — 视"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://i.mji.rip/2026/02/08/4692066cf23d78289d3ffbc30f106aa6.png"><meta property="article:author" content="JY"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://i.mji.rip/2026/02/08/4692066cf23d78289d3ffbc30f106aa6.png"><meta name="description" content="记录 Smart Maintenance Copilot（智能维护助手）从本地 v0 项目到生产部署的完整流程，包括架构设计、子域名配置、视频流接入，以及后续后端接口规划。 项目概述基于 v0 生成的 Next.js 16 + shadcn&amp;#x2F;ui 工业巡检仪表盘，三大面板：  左侧 — 视"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://hwarkm.com/2026/04/26/irweb-%E5%B7%A5%E4%B8%9A%E5%B7%A1%E6%A3%80%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E9%83%A8%E7%BD%B2%E6%89%8B%E5%86%8C/"><link rel="preconnect" href="//cdn.cbd.int"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/swiper/swiper.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  linkPageTop: undefined,
+  peoplecanvas: {"enable":true,"img":"https://upload-bbs.miyoushe.com/upload/2024/07/27/125766904/ba62475f396df9de3316a08ed9e65d86_5680958632268053399..png"},
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: undefined,
+  greetingBox: undefined,
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  music_page_default: "nav_music",
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: {"mode":"api","api":"https://img2color-go.vercel.app/api?img=","cover_change":true},
+  authorStatus: {"skills":["🤖️ 数码科技爱好者","🔨 设计开发一条龙","🏃 脚踏实地行动派"]},
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    simplehomepage: true,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: JY","link":"链接: ","source":"来源: HW's Club","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.2.0/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.2.0/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'HW\'s Club',
+  title: 'irweb 工业巡检智能助手部署手册',
+  postAI: '',
+  pageFillDescription: '项目概述, 当前状态, 拓扑图, 剩余步骤, 1. Pi 端启动推流（唯一尚未完成的）, 2. 停掉旧脚本, 后续后端接口规划, 视频检测接口（VideoMonitor）, SOP 任务接口（SOPWorkflow）, AI 助手接口（AIAssistant）, 告警接口（AlertPopup）, 认证接口（可选）, 推荐后端方案, 版本记录记录智能维护助手从本地项目到生产部署的完整流程包括架构设计子域名配置视频流接入以及后续后端接口规划项目概述基于生成的工业巡检仪表盘三大面板左侧视频监控实时流物体检测标注中央流程标准作业步骤指引可展开详情右侧助手智能问答面板当前模拟中当前状态模块状态说明前端部署已完成静态导出子域名已完成独立块不动安知鱼组网已完成服务器视频流代理已完成推流待启动需传至并运行拓扑图博客前端剩余步骤端启动推流唯一尚未完成的上安装依赖传输脚本到终端上运行验证应返回停掉旧脚本旧的推流脚本端旧的接收脚本如有后续后端接口规划前端组件现已全部实现但数据源均为硬编码以下为接入真实后端需要的接口清单视频检测接口当前流已就绪检测框仍为模拟数据方法路由说明推送检测结果实现思路端加一条线程跑轻量检测结果通过同一推到前端或者服务端用一个后端转发任务接口当前页面内硬编码状态不持久方法路由说明任务列表含步骤单个任务详情创建新任务更新步骤状态数据结构参考的接口助手接口当前模拟秒后返回固定回复方法路由说明发送消息获取回复建议流式上传图片供分析请求体这个步骤需要注意什么后端对接通义千问等任意用当前步骤上下文历史消息构建告警接口当前秒后自动触发硬编码告警方法路由说明服务端主动推送告警事件数据结构参考的认证接口可选方法路由说明登录当前会话推荐后端方案最简单的落地方式在服务器上跑一个后端不新增端口通过反向代理统一挂到在追加单个文件即可覆盖所有接口入口任务对话检测数据告警前端接入只需把中的硬编码数据替换为调用和连接即可改动量约行版本记录日期变更初始部署组网流代理配置本文档持续更新待推流与后端接口接入后补充实测数据',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-04-26 17:00:19',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 8.1.1"></head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">hw's Club</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客Link"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客Link"/><span class="back-menu-item-text">博客Link</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">HW's Club</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a><div id="he-plugin-simple"></div><script>var WIDGET = {
+  "CONFIG": {
+    "modules": "0124",
+    "background": "2",
+    "tmpColor": "FFFFFF",
+    "tmpSize": "16",
+    "cityColor": "FFFFFF",
+    "citySize": "16",
+    "aqiColor": "E8D87B",
+    "aqiSize": "16",
+    "weatherIconSize": "24",
+    "alertIconSize": "18",
+    "padding": "10px 10px 10px 10px",
+    "shadow": "0",
+    "language": "auto",
+    "borderRadius": "20",
+    "fixed": "true",
+    "vertical": "top",
+    "horizontal": "left",
+    "left": "20",
+    "top": "7.1",
+    "key": "df245676fb434a0691ead1c63341cd94"
+  }
+}
+</script><link rel="stylesheet" href="https://widget.qweather.net/simple/static/css/he-simple.css?v=1.4.0"/><script src="https://widget.qweather.net/simple/static/js/he-simple.js?v=1.4.0"></script></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><i class="anzhiyufont anzhiyu-icon-music faa-tada" style="font-size: 0.9em;"></i><span> 音乐馆</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/bangumis/"><i class="anzhiyufont anzhiyu-icon-bilibili faa-tada" style="font-size: 0.9em;"></i><span> 追番页</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/tech/" style="font-size: 1.05rem;">-tech<sup>1</sup></a><a href="/tags/V-JEPA/" style="font-size: 1.05rem;">V-JEPA<sup>1</sup></a><a href="/tags/tech/" style="font-size: 1.05rem;">tech<sup>1</sup></a><a href="/tags/%E5%A4%8D%E4%B9%A0/" style="font-size: 1.05rem;">复习<sup>1</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0/" style="font-size: 1.05rem;">学习<sup>1</sup></a><a href="/tags/%E5%B7%A5%E4%B8%9A%E5%AE%89%E5%85%A8/" style="font-size: 1.05rem;">工业安全<sup>2</sup></a><a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" style="font-size: 1.05rem;">深度学习<sup>1</sup></a><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" style="font-size: 1.05rem;">计算机视觉<sup>1</sup></a><a href="/tags/%E9%83%A8%E7%BD%B2/" style="font-size: 1.05rem;">部署<sup>1</sup></a><a href="/tags/%E9%9C%80%E6%B1%82%E5%B7%A5%E7%A8%8B/" style="font-size: 1.05rem;">需求工程<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/04/"><span class="card-archive-list-date">四月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/03/"><span class="card-archive-list-date">三月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2026/02/"><span class="card-archive-list-date">二月 2026</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">3</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="article-meta tags"><a class="article-meta__tags" href="/tags/%E5%B7%A5%E4%B8%9A%E5%AE%89%E5%85%A8/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>工业安全</span></a><a class="article-meta__tags" href="/tags/tech/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>tech</span></a><a class="article-meta__tags" href="/tags/%E9%83%A8%E7%BD%B2/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>部署</span></a></span></div></div><h1 class="post-title" itemprop="name headline">irweb 工业巡检智能助手部署手册</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2026-04-26T09:00:00.000Z" title="发表于 2026-04-26 17:00:00">2026-04-26</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2026-04-26T09:00:19.063Z" title="更新于 2026-04-26 17:00:19">2026-04-26</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">1.1k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为北京"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>北京</span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://hwarkm.com/2026/04/26/irweb-%E5%B7%A5%E4%B8%9A%E5%B7%A1%E6%A3%80%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E9%83%A8%E7%BD%B2%E6%89%8B%E5%86%8C/"><header><a href="/tags/%E5%B7%A5%E4%B8%9A%E5%AE%89%E5%85%A8/" tabindex="-1" itemprop="url">工业安全</a><a href="/tags/tech/" tabindex="-1" itemprop="url">tech</a><a href="/tags/%E9%83%A8%E7%BD%B2/" tabindex="-1" itemprop="url">部署</a><h1 id="CrawlerTitle" itemprop="name headline">irweb 工业巡检智能助手部署手册</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">JY</span><time itemprop="dateCreated datePublished" datetime="2026-04-26T09:00:00.000Z" title="发表于 2026-04-26 17:00:00">2026-04-26</time><time itemprop="dateCreated datePublished" datetime="2026-04-26T09:00:19.063Z" title="更新于 2026-04-26 17:00:19">2026-04-26</time></header><p>记录 Smart Maintenance Copilot（智能维护助手）从本地 v0 项目到生产部署的完整流程，包括架构设计、子域名配置、视频流接入，以及后续后端接口规划。</p>
+<h2 id="项目概述"><a href="#项目概述" class="headerlink" title="项目概述"></a>项目概述</h2><p>基于 v0 生成的 Next.js 16 + shadcn&#x2F;ui 工业巡检仪表盘，三大面板：</p>
+<ul>
+<li><strong>左侧 — 视频监控</strong>：实时 MJPEG 流 + 物体检测标注</li>
+<li><strong>中央 — SOP 流程</strong>：标准作业步骤指引（可展开详情）</li>
+<li><strong>右侧 — AI 助手</strong>：智能问答面板（当前模拟中）</li>
+</ul>
+<h2 id="当前状态"><a href="#当前状态" class="headerlink" title="当前状态"></a>当前状态</h2><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>状态</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>前端部署</td>
+<td>已完成</td>
+<td><code>ir.hwarkm.com</code>，静态导出 + Nginx</td>
+</tr>
+<tr>
+<td>子域名 Nginx</td>
+<td>已完成</td>
+<td>独立 server 块，不动安知鱼</td>
+</tr>
+<tr>
+<td>Tailscale 组网</td>
+<td>已完成</td>
+<td>服务器 <code>100.96.190.88</code> &#x2F; Pi <code>100.108.125.114</code></td>
+</tr>
+<tr>
+<td>视频流代理</td>
+<td>已完成</td>
+<td>Nginx <code>/video/stream</code> → Pi MJPEG</td>
+</tr>
+<tr>
+<td>Pi 推流</td>
+<td>待启动</td>
+<td><code>pi_stream.py</code> 需传至 Pi 并运行</td>
+</tr>
+</tbody></table>
+<h3 id="拓扑图"><a href="#拓扑图" class="headerlink" title="拓扑图"></a>拓扑图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Pi (pi_stream.py)                     Server (47.122.144.76)</span><br><span class="line">  Picamera2                              ├─ hwarkm.com    (Hexo 博客)</span><br><span class="line">  Flask :8080/stream ← MJPEG             ├─ ir.hwarkm.com (Next.js 前端)</span><br><span class="line">       │                                 │   └ /video/stream ──proxy──→ Pi:8080</span><br><span class="line">       └── Tailscale ──────────────────┘</span><br></pre></td></tr></table></figure>
+
+<h2 id="剩余步骤"><a href="#剩余步骤" class="headerlink" title="剩余步骤"></a>剩余步骤</h2><h3 id="1-Pi-端启动推流（唯一尚未完成的）"><a href="#1-Pi-端启动推流（唯一尚未完成的）" class="headerlink" title="1. Pi 端启动推流（唯一尚未完成的）"></a>1. Pi 端启动推流（唯一尚未完成的）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Pi 上安装依赖</span></span><br><span class="line">pip install flask opencv-python-headless</span><br><span class="line"></span><br><span class="line"><span class="comment"># 传输脚本到 Pi（Windows 终端）</span></span><br><span class="line">scp D:\hwarfBlog\ir\pi_stream.py &lt;user&gt;@100.108.125.114:~/</span><br><span class="line"></span><br><span class="line"><span class="comment"># Pi 上运行</span></span><br><span class="line">python ~/pi_stream.py</span><br></pre></td></tr></table></figure>
+
+<p>验证：<code>curl -s -o /dev/null -w &quot;%{http_code}&quot; http://100.108.125.114:8080/stream</code> 应返回 <code>200</code>。</p>
+<h3 id="2-停掉旧脚本"><a href="#2-停掉旧脚本" class="headerlink" title="2. 停掉旧脚本"></a>2. 停掉旧脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pkill -f tzb.py    <span class="comment"># 旧的 TCP 推流脚本</span></span><br><span class="line">pkill -f tzbserver.py  <span class="comment"># Windows 端旧的接收脚本（如有）</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="后续后端接口规划"><a href="#后续后端接口规划" class="headerlink" title="后续后端接口规划"></a>后续后端接口规划</h2><p>前端组件现已全部实现，但数据源均为硬编码。以下为接入真实后端需要的接口清单。</p>
+<h3 id="视频检测接口（VideoMonitor）"><a href="#视频检测接口（VideoMonitor）" class="headerlink" title="视频检测接口（VideoMonitor）"></a>视频检测接口（VideoMonitor）</h3><p>当前：MJPEG 流已就绪，检测框仍为模拟数据。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路由</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>WS</code></td>
+<td><code>/ws/detections</code></td>
+<td>WebSocket 推送检测结果 <code>{ id, label, status, x, y, width, height }[]</code></td>
+</tr>
+</tbody></table>
+<p>实现思路：Pi 端加一条线程跑轻量 YOLO，检测结果通过同一 WebSocket 推到前端。或者服务端用一个 Python 后端转发。</p>
+<h3 id="SOP-任务接口（SOPWorkflow）"><a href="#SOP-任务接口（SOPWorkflow）" class="headerlink" title="SOP 任务接口（SOPWorkflow）"></a>SOP 任务接口（SOPWorkflow）</h3><p>当前：页面内 <code>initialSteps</code> 硬编码，状态不持久。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路由</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET</code></td>
+<td><code>/api/tasks</code></td>
+<td>任务列表（含 SOP 步骤）</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/tasks/:id</code></td>
+<td>单个任务详情</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/tasks</code></td>
+<td>创建新任务</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/tasks/:id/steps/:stepId</code></td>
+<td>更新步骤状态（pending→active→completed）</td>
+</tr>
+</tbody></table>
+<p>数据结构参考 <code>sop-workflow.tsx:10-18</code> 的 <code>SOPStep</code> 接口：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">SOPStep</span> &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="built_in">number</span></span><br><span class="line">  <span class="attr">title</span>: <span class="built_in">string</span></span><br><span class="line">  <span class="attr">instruction</span>: <span class="built_in">string</span></span><br><span class="line">  <span class="attr">tools</span>: <span class="built_in">string</span>[]</span><br><span class="line">  <span class="attr">risk</span>: <span class="string">&quot;none&quot;</span> | <span class="string">&quot;caution&quot;</span> | <span class="string">&quot;danger&quot;</span></span><br><span class="line">  <span class="attr">status</span>: <span class="string">&quot;pending&quot;</span> | <span class="string">&quot;active&quot;</span> | <span class="string">&quot;completed&quot;</span></span><br><span class="line">  <span class="attr">details</span>?: <span class="built_in">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AI-助手接口（AIAssistant）"><a href="#AI-助手接口（AIAssistant）" class="headerlink" title="AI 助手接口（AIAssistant）"></a>AI 助手接口（AIAssistant）</h3><p>当前：<code>setTimeout</code> 模拟 1 秒后返回固定回复。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路由</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST</code></td>
+<td><code>/api/chat</code></td>
+<td>发送消息，获取 AI 回复（建议 SSE 流式）</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/chat/upload</code></td>
+<td>上传图片供 AI 分析</td>
+</tr>
+</tbody></table>
+<p>请求体：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;messages&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;role&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个步骤需要注意什么？&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;context&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;currentStep&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span> <span class="attr">&quot;taskId&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>后端对接 Claude API &#x2F; 通义千问等任意 LLM，用当前步骤上下文 + 历史消息构建 system prompt。</p>
+<h3 id="告警接口（AlertPopup）"><a href="#告警接口（AlertPopup）" class="headerlink" title="告警接口（AlertPopup）"></a>告警接口（AlertPopup）</h3><p>当前：<code>useEffect</code> 5 秒后自动触发硬编码告警。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路由</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>WS</code></td>
+<td><code>/ws/alerts</code></td>
+<td>服务端主动推送告警事件</td>
+</tr>
+</tbody></table>
+<p>数据结构参考 <code>alert-popup.tsx:7-14</code> 的 props：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">Alert</span> &#123;</span><br><span class="line">  <span class="attr">title</span>: <span class="built_in">string</span></span><br><span class="line">  <span class="attr">message</span>: <span class="built_in">string</span></span><br><span class="line">  <span class="attr">suggestedAction</span>: <span class="built_in">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="认证接口（可选）"><a href="#认证接口（可选）" class="headerlink" title="认证接口（可选）"></a>认证接口（可选）</h3><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路由</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST</code></td>
+<td><code>/api/auth/login</code></td>
+<td>登录</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/auth/session</code></td>
+<td>当前会话</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="推荐后端方案"><a href="#推荐后端方案" class="headerlink" title="推荐后端方案"></a>推荐后端方案</h2><p>最简单的落地方式：在服务器上跑一个 <strong>Python FastAPI</strong> 后端，不新增端口，通过 Nginx 反向代理统一挂到 <code>ir.hwarkm.com/api/*</code>。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 ir.hwarkm.com server block 追加</span></span><br><span class="line"><span class="section">location</span> /api/ &#123;</span><br><span class="line">    <span class="attribute">proxy_pass</span> http://127.0.0.1:8001;</span><br><span class="line">    <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">    <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="section">location</span> /ws/ &#123;</span><br><span class="line">    <span class="attribute">proxy_pass</span> http://127.0.0.1:8001;</span><br><span class="line">    <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">    <span class="attribute">proxy_set_header</span> Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">    <span class="attribute">proxy_set_header</span> Connection <span class="string">&quot;upgrade&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>单个 FastAPI 文件即可覆盖所有接口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/irbackend</span><br><span class="line">  main.py          # FastAPI 入口</span><br><span class="line">  routers/</span><br><span class="line">    tasks.py        # SOP 任务 CRUD</span><br><span class="line">    chat.py          # AI 对话</span><br><span class="line">    detections.py    # 检测数据 WebSocket</span><br><span class="line">    alerts.py        # 告警 WebSocket</span><br><span class="line">  models.py          # SQLAlchemy / SQLite</span><br></pre></td></tr></table></figure>
+
+<p>前端接入只需把 <code>page.tsx</code> 中的硬编码数据替换为 <code>fetch()</code> 调用和 WebSocket 连接即可，改动量约 80 行。</p>
+<h2 id="版本记录"><a href="#版本记录" class="headerlink" title="版本记录"></a>版本记录</h2><table>
+<thead>
+<tr>
+<th>日期</th>
+<th>变更</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2026-04-26</td>
+<td>初始部署，Tailscale 组网，MJPEG 流代理配置</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>本文档持续更新，待 Pi 推流与后端接口接入后补充实测数据。</em></p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://i.mji.rip/2026/02/08/4692066cf23d78289d3ffbc30f106aa6.png" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://i.mji.rip/2026/02/08/4692066cf23d78289d3ffbc30f106aa6.png" title="头像" alt="头像"></a><div class="post-copyright__author_name">JY</div><div class="post-copyright__author_desc">Anything and everything</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://hwarkm.com/2026/04/26/irweb-%E5%B7%A5%E4%B8%9A%E5%B7%A1%E6%A3%80%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E9%83%A8%E7%BD%B2%E6%89%8B%E5%86%8C/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://hwarkm.com/2026/04/26/irweb-%E5%B7%A5%E4%B8%9A%E5%B7%A1%E6%A3%80%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E9%83%A8%E7%BD%B2%E6%89%8B%E5%86%8C/')">irweb 工业巡检智能助手部署手册</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://hwarkm.com/2026/04/26/irweb-%E5%B7%A5%E4%B8%9A%E5%B7%A1%E6%A3%80%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E9%83%A8%E7%BD%B2%E6%89%8B%E5%86%8C/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://hwarkm.com" target="_blank">HW's Club</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/%E5%B7%A5%E4%B8%9A%E5%AE%89%E5%85%A8/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>工业安全<span class="tagsPageCount">2</span></a><a class="post-meta__box__tags" href="/tags/tech/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>tech<span class="tagsPageCount">1</span></a><a class="post-meta__box__tags" href="/tags/%E9%83%A8%E7%BD%B2/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>部署<span class="tagsPageCount">1</span></a></div></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2026/04/26/%E9%9C%80%E6%B1%82%E5%B7%A5%E7%A8%8B-%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">需求工程复习笔记</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2026/03/08/Vjepa/" title="基于 V-JEPA 2 的工业图像危险分类器构建技术报告"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2026-03-08</div><div class="title">基于 V-JEPA 2 的工业图像危险分类器构建技术报告</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://i.mji.rip/2026/02/08/4692066cf23d78289d3ffbc30f106aa6.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/"><h1 class="author-info__name">JY</h1><div class="author-info__desc">Anything and everything</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/Hongwuwu" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a><a class="social-icon faa-parent animated-hover" href="https://space.bilibili.com/689948349" target="_blank" title="BiliBili"><i class="anzhiyufont anzhiyu-icon-bilibili"></i></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">项目概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%93%E5%89%8D%E7%8A%B6%E6%80%81"><span class="toc-number">2.</span> <span class="toc-text">当前状态</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%93%E6%89%91%E5%9B%BE"><span class="toc-number">2.1.</span> <span class="toc-text">拓扑图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%A9%E4%BD%99%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.</span> <span class="toc-text">剩余步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Pi-%E7%AB%AF%E5%90%AF%E5%8A%A8%E6%8E%A8%E6%B5%81%EF%BC%88%E5%94%AF%E4%B8%80%E5%B0%9A%E6%9C%AA%E5%AE%8C%E6%88%90%E7%9A%84%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">1. Pi 端启动推流（唯一尚未完成的）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%81%9C%E6%8E%89%E6%97%A7%E8%84%9A%E6%9C%AC"><span class="toc-number">3.2.</span> <span class="toc-text">2. 停掉旧脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E7%BB%AD%E5%90%8E%E7%AB%AF%E6%8E%A5%E5%8F%A3%E8%A7%84%E5%88%92"><span class="toc-number">4.</span> <span class="toc-text">后续后端接口规划</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%86%E9%A2%91%E6%A3%80%E6%B5%8B%E6%8E%A5%E5%8F%A3%EF%BC%88VideoMonitor%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">视频检测接口（VideoMonitor）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SOP-%E4%BB%BB%E5%8A%A1%E6%8E%A5%E5%8F%A3%EF%BC%88SOPWorkflow%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">SOP 任务接口（SOPWorkflow）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AI-%E5%8A%A9%E6%89%8B%E6%8E%A5%E5%8F%A3%EF%BC%88AIAssistant%EF%BC%89"><span class="toc-number">4.3.</span> <span class="toc-text">AI 助手接口（AIAssistant）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%91%8A%E8%AD%A6%E6%8E%A5%E5%8F%A3%EF%BC%88AlertPopup%EF%BC%89"><span class="toc-number">4.4.</span> <span class="toc-text">告警接口（AlertPopup）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A4%E8%AF%81%E6%8E%A5%E5%8F%A3%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="toc-number">4.5.</span> <span class="toc-text">认证接口（可选）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E5%90%8E%E7%AB%AF%E6%96%B9%E6%A1%88"><span class="toc-number">5.</span> <span class="toc-text">推荐后端方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%88%E6%9C%AC%E8%AE%B0%E5%BD%95"><span class="toc-number">6.</span> <span class="toc-text">版本记录</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/26/irweb-%E5%B7%A5%E4%B8%9A%E5%B7%A1%E6%A3%80%E6%99%BA%E8%83%BD%E5%8A%A9%E6%89%8B%E9%83%A8%E7%BD%B2%E6%89%8B%E5%86%8C/" title="irweb 工业巡检智能助手部署手册">irweb 工业巡检智能助手部署手册</a><time datetime="2026-04-26T09:00:00.000Z" title="发表于 2026-04-26 17:00:00">2026-04-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/26/%E9%9C%80%E6%B1%82%E5%B7%A5%E7%A8%8B-%E5%A4%8D%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="需求工程复习笔记">需求工程复习笔记</a><time datetime="2026-04-26T07:30:00.000Z" title="发表于 2026-04-26 15:30:00">2026-04-26</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/08/Vjepa/" title="基于 V-JEPA 2 的工业图像危险分类器构建技术报告">基于 V-JEPA 2 的工业图像危险分类器构建技术报告</a><time datetime="2026-03-08T14:00:00.000Z" title="发表于 2026-03-08 22:00:00">2026-03-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/07/%E6%B5%8B%E8%AF%95%EF%BC%81%E8%BF%99%E6%98%AF%E4%B8%80%E6%9D%A1%E7%94%B1Claude%E7%BC%96%E8%BE%91%E5%B9%B6%E5%8F%91%E5%B8%83%E7%9A%84Blog%EF%BC%81/" title="测试！这是一条由Claud编辑并发布的Blog！">测试！这是一条由Claud编辑并发布的Blog！</a><time datetime="2026-03-07T08:34:24.000Z" title="发表于 2026-03-07 16:34:24">2026-03-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/15/hexo/" title="Hexo探索过程中遇到的问题（在写中……）">Hexo探索过程中遇到的问题（在写中……）</a><time datetime="2026-02-15T08:29:34.000Z" title="发表于 2026-02-15 16:29:34">2026-02-15</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2026 By <a class="footer-bar-link" href="/" title="JY" target="_blank">JY</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://beian.miit.gov.cn/" title="京ICP备2026007392号">京ICP备2026007392号</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">7</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">10</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">0</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">hw's Club</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://hexo.anheyu.com/" title="博客Link"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客Link"/><span class="back-menu-item-text">博客Link</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://image.anheyu.com/" title="安知鱼图床"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://image.anheyu.com/favicon.ico" alt="安知鱼图床"/><span class="back-menu-item-text">安知鱼图床</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><i class="anzhiyufont anzhiyu-icon-box-archive faa-tada" style="font-size: 0.9em;"></i><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><i class="anzhiyufont anzhiyu-icon-shapes faa-tada" style="font-size: 0.9em;"></i><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags faa-tada" style="font-size: 0.9em;"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><i class="anzhiyufont anzhiyu-icon-music faa-tada" style="font-size: 0.9em;"></i><span> 音乐馆</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/bangumis/"><i class="anzhiyufont anzhiyu-icon-bilibili faa-tada" style="font-size: 0.9em;"></i><span> 追番页</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/tech/" style="font-size: 0.88rem;">-tech<sup>1</sup></a><a href="/tags/V-JEPA/" style="font-size: 0.88rem;">V-JEPA<sup>1</sup></a><a href="/tags/tech/" style="font-size: 0.88rem;">tech<sup>1</sup></a><a href="/tags/%E5%A4%8D%E4%B9%A0/" style="font-size: 0.88rem;">复习<sup>1</sup></a><a href="/tags/%E5%AD%A6%E4%B9%A0/" style="font-size: 0.88rem;">学习<sup>1</sup></a><a href="/tags/%E5%B7%A5%E4%B8%9A%E5%AE%89%E5%85%A8/" style="font-size: 0.88rem;">工业安全<sup>2</sup></a><a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" style="font-size: 0.88rem;">深度学习<sup>1</sup></a><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" style="font-size: 0.88rem;">计算机视觉<sup>1</sup></a><a href="/tags/%E9%83%A8%E7%BD%B2/" style="font-size: 0.88rem;">部署<sup>1</sup></a><a href="/tags/%E9%9C%80%E6%B1%82%E5%B7%A5%E7%A8%8B/" style="font-size: 0.88rem;">需求工程<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="5037242651" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://music.163.com/playlist?id=5037242651&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/@fancyapps/ui@6.1.6/dist/fancybox/fancybox.umd.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@19.1.3/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("08/02/2026 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.7.1",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 JY 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><div class="js-pjax"><input type="hidden" name="page-type" id="page-type" value="post"></div><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://cdn.cbd.int/qrcodejs@1.0.0/qrcode.min.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><canvas class="fireworks" mobile="true"></canvas><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/dist/fireworks.min.js"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/dist/canvas-fluttering-ribbon.min.js"></script><script id="click-show-text" src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/dist/click-show-text.min.js" data-mobile="true" data-text="hw,hw,hw" data-fontsize="15px" data-random="true" async="async"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
